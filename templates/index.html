@@ -243,7 +243,7 @@
     </div>
     <div class="shoutouts-feed" id="shoutoutsFeed" aria-live="polite" role="log">
       {% for s in shoutouts %}
-      <div class="shoutout-item">
+      <div class="shoutout-item" data-id="{{ s.id }}">
         <div class="shoutout-avatar">{{ ['🧠','📊','🤖','🐍','📈','🔬','💡','🎯'] | random }}</div>
         <div>
           <div class="shoutout-name">{{ s.name | upper }}</div>

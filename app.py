@@ -253,7 +253,11 @@ def gallery_upload():
 
 @app.route('/api/gallery', methods=['GET'])
 def get_gallery():
-    items = GalleryItem.query.order_by(GalleryItem.created_at.desc()).limit(50).all()
+    since = request.args.get('since', 0, type=int)
+    q = GalleryItem.query.order_by(GalleryItem.created_at.desc())
+    if since:
+        q = q.filter(GalleryItem.id > since)
+    items = q.limit(50).all()
     return jsonify([i.to_dict() for i in items])
 
 @app.route('/api/gallery/<int:item_id>', methods=['DELETE'])
@@ -295,7 +299,11 @@ def index():
 
 @app.route('/api/shoutouts', methods=['GET'])
 def get_shoutouts():
-    items = Shoutout.query.order_by(Shoutout.created_at.desc()).limit(30).all()
+    since = request.args.get('since', 0, type=int)
+    q = Shoutout.query.order_by(Shoutout.created_at.desc())
+    if since:
+        q = q.filter(Shoutout.id > since)
+    items = q.limit(30).all()
     return jsonify([s.to_dict() for s in items])
 
 @app.route('/api/shoutouts', methods=['POST'])

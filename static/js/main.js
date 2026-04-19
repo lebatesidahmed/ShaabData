@@ -1,8 +1,11 @@
 const GRADUATION = new Date(Date.UTC(2025, 5, 30, 0, 0, 0));
 const AVATARS = ['🧠','📊','🤖','🐍','📈','🔬','💡','🎯','🦾','📐','🧬','🌐'];
+const POLL_INTERVAL = 5000; // ms between live-update checks
 
 let pollVoted = false, pollSelectedId = null, pollId = null;
 let pendingFiles = [];
+let latestShoutoutId = 0;
+let latestGalleryId = 0;
 
 function pad(v) { return String(v).padStart(2,'0'); }
 
@@ -39,6 +42,7 @@ function escapeHtml(str) {
 function renderShoutoutItem(s) {
   const div = document.createElement('div');
   div.className = 'shoutout-item';
+  if (s.id) { div.dataset.id = s.id; if (s.id > latestShoutoutId) latestShoutoutId = s.id; }
   div.innerHTML = `
     <div class="shoutout-avatar">${AVATARS[Math.floor(Math.random()*AVATARS.length)]}</div>
     <div>
@@ -174,6 +178,7 @@ function hideGalleryEmpty() {
 }
 
 function prependGalleryItem(item) {
+  if (item.id > latestGalleryId) latestGalleryId = item.id;
   let grid = document.getElementById('galleryGrid');
   if (!grid) {
     grid = document.createElement('div');
@@ -209,6 +214,64 @@ window.deleteGalleryItem = async function(id, btn) {
     showToast('✓ تم الحذف');
   } catch { showToast('خطأ في الحذف', true); }
 };
+
+// ─── LIVE UPDATES (polling) ───────────────────────────────
+
+function scanInitialIds() {
+  // Track highest shoutout id already on the page
+  document.querySelectorAll('#shoutoutsFeed .shoutout-item[data-id]').forEach(el => {
+    const id = parseInt(el.dataset.id || 0);
+    if (id > latestShoutoutId) latestShoutoutId = id;
+  });
+  // Track highest gallery id already on the page
+  document.querySelectorAll('#galleryGrid .real-gallery-item[data-id]').forEach(el => {
+    const id = parseInt(el.dataset.id || 0);
+    if (id > latestGalleryId) latestGalleryId = id;
+  });
+}
+
+async function pollShoutouts() {
+  if (!latestShoutoutId) return;      // nothing on page yet, skip (avoid spamming)
+  try {
+    const res = await fetch(`/api/shoutouts?since=${latestShoutoutId}`);
+    if (!res.ok) return;
+    const items = await res.json();
+    if (!items.length) return;
+    const feed = document.getElementById('shoutoutsFeed');
+    if (!feed) return;
+    // Items come newest-first from the server; prepend in reverse so oldest-new appears first
+    [...items].reverse().forEach(s => {
+      const el = renderShoutoutItem(s, s.id);
+      feed.prepend(el);
+      el.classList.add('shoutout-new');
+      setTimeout(() => el.classList.remove('shoutout-new'), 2000);
+      if (s.id > latestShoutoutId) latestShoutoutId = s.id;
+    });
+  } catch { /* silent */ }
+}
+
+async function pollGallery() {
+  if (!document.getElementById('gallery')) return;
+  try {
+    const res = await fetch(`/api/gallery?since=${latestGalleryId}`);
+    if (!res.ok) return;
+    const items = await res.json();
+    if (!items.length) return;
+    hideGalleryEmpty();
+    [...items].reverse().forEach(item => {
+      // Don't double-add our own fresh uploads
+      if (document.querySelector(`#galleryGrid [data-id="${item.id}"]`)) return;
+      prependGalleryItem(item, false);   // false = not mine (server says the truth anyway)
+      if (item.id > latestGalleryId) latestGalleryId = item.id;
+    });
+  } catch { /* silent */ }
+}
+
+function startLiveUpdates() {
+  scanInitialIds();
+  setInterval(pollShoutouts, POLL_INTERVAL);
+  setInterval(pollGallery,   POLL_INTERVAL);
+}
 
 // ─── SCROLL / NAV ─────────────────────────────────────────
 
@@ -252,6 +315,7 @@ function init() {
   setupUploadZone();
   initScrollReveal();
   initNavHighlight();
+  startLiveUpdates();
 }
 
 document.addEventListener('DOMContentLoaded', init);

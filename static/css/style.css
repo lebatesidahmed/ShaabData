@@ -1148,3 +1148,34 @@ footer {
 #captionModal.open {
   display: flex !important;
 }
+
+/* ─── LIVE UPDATE ANIMATIONS ─── */
+@keyframes flashNew {
+  0%   { background: rgba(201,168,76,0.22); }
+  100% { background: transparent; }
+}
+.shoutout-new {
+  animation: flashNew 2s ease forwards;
+}
+
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--green);
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  padding: 12px 28px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 9998;
+  white-space: nowrap;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
