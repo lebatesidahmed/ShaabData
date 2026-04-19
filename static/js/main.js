@@ -1,5 +1,5 @@
 const GRADUATION = new Date(Date.UTC(2025, 5, 30, 0, 0, 0));
-const AVATARS = ['🧠','📊','🤖','🐍','📈','🔬','💡','🎯','🦾','📐'];
+const AVATARS = ['🧠','📊','🤖','🐍','📈','🔬','💡','🎯','🦾','📐','🧬','🌐'];
 
 let pollVoted = false;
 let pollSelectedId = null;
@@ -10,8 +10,10 @@ function pad(v) { return String(v).padStart(2,'0'); }
 function updateCountdown() {
   const diff = GRADUATION - Date.now();
   if (diff <= 0) {
-    ['cd-days','cd-hours','cd-mins'].forEach(id => document.getElementById(id).textContent = '00');
-    document.getElementById('cd-secs').textContent = '🎉';
+    document.getElementById('cd-days').textContent  = '00';
+    document.getElementById('cd-hours').textContent = '00';
+    document.getElementById('cd-mins').textContent  = '00';
+    document.getElementById('cd-secs').textContent  = '🎉';
     return;
   }
   document.getElementById('cd-days').textContent  = pad(Math.floor(diff / 86400000));
@@ -29,7 +31,12 @@ function showToast(msg) {
   }
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function renderShoutoutItem(s) {
@@ -39,21 +46,11 @@ function renderShoutoutItem(s) {
   div.innerHTML = `
     <div class="shoutout-avatar">${avatar}</div>
     <div>
-      <div class="shoutout-name">${s.name.toUpperCase()}</div>
+      <div class="shoutout-name">${escapeHtml(s.name).toUpperCase()}</div>
       <div class="shoutout-text">${escapeHtml(s.message)}</div>
       <div class="shoutout-time">${s.time}</div>
     </div>`;
   return div;
-}
-
-function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function renderShoutouts(list) {
-  const feed = document.getElementById('shoutoutsFeed');
-  feed.innerHTML = '';
-  list.forEach(s => feed.appendChild(renderShoutoutItem(s)));
 }
 
 async function submitShoutout() {
@@ -62,27 +59,29 @@ async function submitShoutout() {
   const btn    = document.getElementById('shoutSubmit');
   const name   = nameEl.value.trim();
   const message = msgEl.value.trim();
-  if (!name || !message) { showToast('أدخل اسمك ورسالتك'); return; }
+  if (!name || !message) { showToast('أدخل اسمك ورسالتك أولاً'); return; }
 
   btn.disabled = true;
+  btn.textContent = '...جاري الإرسال';
   try {
     const res = await fetch('/api/shoutouts', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ name, message }),
     });
-    if (!res.ok) throw new Error('server error');
+    if (!res.ok) throw new Error();
     const shoutout = await res.json();
     const feed = document.getElementById('shoutoutsFeed');
-    const item = renderShoutoutItem(shoutout);
-    feed.prepend(item);
+    feed.prepend(renderShoutoutItem(shoutout));
     nameEl.value = '';
     msgEl.value = '';
-    showToast('تم التسجيل في السجل التاريخي ✓');
-  } catch (e) {
+    nameEl.focus();
+    showToast('✓ تم التسجيل في السجل التاريخي');
+  } catch {
     showToast('حدث خطأ، حاول مرة ثانية');
   } finally {
     btn.disabled = false;
+    btn.textContent = 'إرسال إلى السجل ←';
   }
 }
 
@@ -94,11 +93,12 @@ function renderPoll(data) {
   data.options.forEach(opt => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'poll-option' + (pollVoted ? ' voted' : '') + (pollSelectedId === opt.id ? ' selected' : '');
+    btn.className = 'poll-option'
+      + (pollVoted ? ' voted' : '')
+      + (pollSelectedId === opt.id ? ' selected' : '');
     btn.style.setProperty('--pct', opt.pct + '%');
     btn.dataset.optionId = opt.id;
-    btn.innerHTML = `<span>${escapeHtml(opt.text)}</span><span class="poll-pct">${opt.pct}%</span>`;
-    btn.addEventListener('click', () => castVote(opt.id));
+    btn.innerHTML = `<span class="poll-text">${escapeHtml(opt.text)}</span><span class="poll-pct">${opt.pct}%</span>`;
     container.appendChild(btn);
   });
   document.getElementById('pollTotal').textContent = `${data.total} صوت · اختر بحكمة`;
@@ -117,51 +117,63 @@ async function castVote(optionId) {
     if (!res.ok) throw new Error();
     const data = await res.json();
     renderPoll(data);
-    showToast('تم تسجيل صوتك ✓');
+    showToast('✓ تم تسجيل صوتك');
   } catch {
     pollVoted = false;
     pollSelectedId = null;
-    showToast('حدث خطأ في التصويت');
+    showToast('خطأ في التصويت، حاول مرة ثانية');
   }
 }
 
-function activateNavOnScroll() {
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('nav a[href^="#"]');
+function initScrollReveal() {
+  const els = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        navLinks.forEach(a => {
-          a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id);
-        });
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
       }
     });
-  }, { threshold: 0.4 });
-  sections.forEach(s => observer.observe(s));
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  els.forEach((el, i) => {
+    el.style.transitionDelay = (i % 6) * 0.07 + 's';
+    observer.observe(el);
+  });
+}
+
+function initNavHighlight() {
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('nav a[href^="#"]');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+      }
+    });
+  }, { threshold: 0.35 });
+  sections.forEach(s => obs.observe(s));
 }
 
 function init() {
   updateCountdown();
   setInterval(updateCountdown, 1000);
 
-  const shoutoutsFeed = document.getElementById('shoutoutsFeed');
-  if (shoutoutsFeed && shoutoutsFeed.dataset.loaded) {
-  }
-
   document.getElementById('shoutSubmit')?.addEventListener('click', submitShoutout);
-
-  const pollEl = document.getElementById('pollOptions');
-  if (pollEl && pollEl.dataset.pollId) {
-    pollId = parseInt(pollEl.dataset.pollId);
-  }
-
-  document.getElementById('pollOptions')?.addEventListener('click', e => {
-    const btn = e.target.closest('[data-option-id]');
-    if (!btn) return;
-    castVote(parseInt(btn.dataset.optionId));
+  document.getElementById('shoutMsg')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.ctrlKey) submitShoutout();
   });
 
-  activateNavOnScroll();
+  const pollOptionsEl = document.getElementById('pollOptions');
+  if (pollOptionsEl?.dataset.pollId) {
+    pollId = parseInt(pollOptionsEl.dataset.pollId);
+    pollOptionsEl.addEventListener('click', e => {
+      const btn = e.target.closest('[data-option-id]');
+      if (btn) castVote(parseInt(btn.dataset.optionId));
+    });
+  }
+
+  initScrollReveal();
+  initNavHighlight();
 }
 
 document.addEventListener('DOMContentLoaded', init);

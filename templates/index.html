@@ -5,46 +5,60 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>شعب داتا العظيم — IUP Data Science</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;500&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
 </head>
 <body>
 
+<!-- TICKER -->
+<div class="ticker" aria-hidden="true">
+  <span class="ticker-inner">
+    ★ شعب داتا العظيم &nbsp;·&nbsp; IUP Data Science &nbsp;·&nbsp; Promo 2025 &nbsp;·&nbsp; Nouakchott, Mauritania &nbsp;·&nbsp; 2022–2025 &nbsp;·&nbsp; "كلنا Data Scientists… على الورقة" &nbsp;·&nbsp; ★ شعب داتا العظيم &nbsp;·&nbsp; IUP Data Science &nbsp;·&nbsp; Promo 2025 &nbsp;·&nbsp; Nouakchott, Mauritania &nbsp;·&nbsp; 2022–2025 &nbsp;·&nbsp; "كلنا Data Scientists… على الورقة" &nbsp;·&nbsp;
+  </span>
+</div>
+
 <!-- TOP BAR -->
 <div class="top-bar">
   <span>IUP · المعهد الجامعي المهني</span>
-  <span><span class="live-dot"></span> LIVE — Promo 2025</span>
   <span>EST. 2022 · NOUAKCHOTT, MR</span>
+  <span><span class="live-dot"></span>LIVE — Promo 2025</span>
 </div>
 
 <!-- HERO -->
 <div class="hero">
-  <div class="seal">
-    <span class="seal-icon">📊</span>
-    <span class="seal-year">2022–2025</span>
-  </div>
-  <div class="hero-eyebrow">Institut Universitaire Professionnel · Data Science</div>
-  <h1 class="hero-title">شعب داتا<br><span>العظيم</span></h1>
-  <p class="hero-subtitle">The Greatest Data Cohort in the History of Mauritanian Academia</p>
-  <div class="hero-stats">
-    <div class="stat">
-      <span class="stat-num">{{ member_count }}</span>
-      <span class="stat-label">عضو</span>
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-content">
+    <div class="seal">
+      <span class="seal-icon">📊</span>
+      <span class="seal-year">2022–2025</span>
     </div>
-    <div class="stat">
-      <span class="stat-num">3</span>
-      <span class="stat-label">سنوات صمود</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">∞</span>
-      <span class="stat-label">مشاريع نظرية</span>
+    <p class="hero-eyebrow">Institut Universitaire Professionnel · Data Science</p>
+    <h1 class="hero-title">
+      شعب داتا<br><span class="gold">العظيم</span>
+    </h1>
+    <div class="hero-rule"></div>
+    <p class="hero-subtitle">The Greatest Data Cohort in the History of Mauritanian Academia</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-num">{{ member_count }}</span>
+        <span class="stat-label">عضو</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">3</span>
+        <span class="stat-label">سنوات صمود</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">∞</span>
+        <span class="stat-label">مشاريع نظرية</span>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- NAV -->
-<nav>
+<nav id="main-nav">
   <a href="#countdown">العد التنازلي</a>
   <a href="#members">الأعضاء</a>
   <a href="#quotes">الحكم</a>
@@ -54,144 +68,196 @@
 </nav>
 
 <!-- COUNTDOWN -->
-<section id="countdown">
-  <div class="section-label">العد التنازلي</div>
-  <h2 class="section-title">حتى نهاية العذاب الرسمي</h2>
-  <div class="countdown-wrapper">
-    <p class="countdown-title">الوقت المتبقي حتى التخرج · Juin 2025</p>
-    <div class="countdown-display">
-      <div class="cd-unit">
-        <span class="cd-num" id="cd-days">00</span>
-        <div class="cd-label">يوم</div>
-      </div>
-      <span class="cd-sep">:</span>
-      <div class="cd-unit">
-        <span class="cd-num" id="cd-hours">00</span>
-        <div class="cd-label">ساعة</div>
-      </div>
-      <span class="cd-sep">:</span>
-      <div class="cd-unit">
-        <span class="cd-num" id="cd-mins">00</span>
-        <div class="cd-label">دقيقة</div>
-      </div>
-      <span class="cd-sep">:</span>
-      <div class="cd-unit">
-        <span class="cd-num" id="cd-secs">00</span>
-        <div class="cd-label">ثانية</div>
+<div class="section-wrap">
+  <section id="countdown">
+    <div class="section-header reveal">
+      <div class="section-num">01</div>
+      <div class="section-label-group">
+        <div class="section-label">العد التنازلي</div>
+        <h2 class="section-title">حتى نهاية العذاب الرسمي</h2>
       </div>
     </div>
-  </div>
-</section>
+    <div class="countdown-box reveal">
+      <p class="countdown-label">الوقت المتبقي حتى التخرج · Juin 2025</p>
+      <div class="countdown-display">
+        <div class="cd-unit">
+          <span class="cd-num" id="cd-days">00</span>
+          <span class="cd-label">يوم</span>
+        </div>
+        <div class="cd-unit">
+          <span class="cd-num" id="cd-hours">00</span>
+          <span class="cd-label">ساعة</span>
+        </div>
+        <div class="cd-unit">
+          <span class="cd-num" id="cd-mins">00</span>
+          <span class="cd-label">دقيقة</span>
+        </div>
+        <div class="cd-unit">
+          <span class="cd-num" id="cd-secs">00</span>
+          <span class="cd-label">ثانية</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
 
 <!-- MEMBERS -->
-<section id="members">
-  <div class="section-label">الأعضاء المؤسسون</div>
-  <h2 class="section-title">عقول الشعب العظيم</h2>
-  <div class="members-grid">
-    {% for m in members %}
-    <div class="member-card">
-      <div class="member-bg"></div>
-      {% if m.badge %}<div class="member-badge">{{ m.badge }}</div>{% endif %}
-      <div class="member-avatar">{{ m.emoji }}</div>
-      <div class="member-name">{{ m.name }}</div>
-      <div class="member-title">{{ m.title }}</div>
-      <div class="member-quote">"{{ m.quote }}"</div>
-    </div>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- QUOTES -->
-<section id="quotes">
-  <div class="section-label">الحكم والمأثورات</div>
-  <h2 class="section-title">كلام يُحفر في الذاكرة</h2>
-  <div class="quotes-grid">
-    {% for q in quotes %}
-    <div class="quote-card">
-      <div class="quote-mark">"</div>
-      <div class="quote-text">{{ q.text }}</div>
-      <div class="quote-author">{{ q.author }}</div>
-      <div class="quote-context">{{ q.context }}</div>
-    </div>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- GALLERY -->
-<section id="gallery">
-  <div class="section-label">الأرشيف المرئي</div>
-  <h2 class="section-title">وثائق سرية من الميدان</h2>
-  <div class="gallery-grid">
-    {% for item in gallery %}
-    <div class="gallery-item">
-      {{ item.emoji }}
-      <div class="gallery-caption">{{ item.caption }}</div>
-    </div>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- SHOUTOUTS -->
-<section id="shoutouts">
-  <div class="section-label">جدار التعبير</div>
-  <h2 class="section-title">قل ما تريد</h2>
-
-  <div class="shoutout-form">
-    <div class="form-row">
-      <input class="form-input" id="shoutName" placeholder="اسمك" type="text" maxlength="50">
-      <input class="form-input" id="shoutMsg" placeholder="رسالتك للشعب العظيم..." type="text" maxlength="300">
-    </div>
-    <button class="submit-btn" id="shoutSubmit" type="button">إرسال إلى السجل التاريخي ←</button>
-  </div>
-
-  <div class="shoutouts-feed" id="shoutoutsFeed" aria-live="polite" role="log">
-    {% for s in shoutouts %}
-    <div class="shoutout-item">
-      <div class="shoutout-avatar">{{ ['🧠','📊','🤖','🐍','📈','🔬','💡','🎯'] | random }}</div>
-      <div>
-        <div class="shoutout-name">{{ s.name | upper }}</div>
-        <div class="shoutout-text">{{ s.message }}</div>
-        <div class="shoutout-time">{{ s.time }}</div>
+<div class="section-wrap">
+  <section id="members">
+    <div class="section-header reveal">
+      <div class="section-num">02</div>
+      <div class="section-label-group">
+        <div class="section-label">الأعضاء المؤسسون</div>
+        <h2 class="section-title">عقول الشعب العظيم</h2>
       </div>
     </div>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- POLLS -->
-<section id="polls">
-  <div class="section-label">التصويت الرسمي</div>
-  <h2 class="section-title">استفتاء الشعب</h2>
-
-  {% if poll %}
-  <div class="poll-card">
-    <div class="poll-question" id="pollQuestion">{{ poll.question }}</div>
-    <div id="pollOptions" data-poll-id="{{ poll.id }}">
-      {% for opt in poll.options %}
-      <button type="button" class="poll-option" style="--pct:{{ opt.pct }}%" data-option-id="{{ opt.id }}">
-        <span>{{ opt.text }}</span>
-        <span class="poll-pct">{{ opt.pct }}%</span>
-      </button>
+    <div class="members-grid">
+      {% for m in members %}
+      <div class="member-card reveal">
+        {% if m.badge %}<div class="member-badge">{{ m.badge }}</div>{% endif %}
+        <div class="member-index">{{ '%02d' % loop.index }} / {{ '%02d' % members|length }}</div>
+        <span class="member-avatar">{{ m.emoji }}</span>
+        <div class="member-name">{{ m.name }}</div>
+        <div class="member-title">{{ m.title }}</div>
+        <div class="member-divider"></div>
+        <div class="member-quote">"{{ m.quote }}"</div>
+      </div>
       {% endfor %}
     </div>
-    <div class="poll-total" id="pollTotal">{{ poll.total }} صوت · اختر بحكمة</div>
-  </div>
-  {% else %}
-  <div class="poll-card">
-    <div class="poll-question">لا يوجد تصويت نشط حالياً</div>
-  </div>
-  {% endif %}
-</section>
+  </section>
+</div>
+
+<!-- QUOTES -->
+<div class="section-wrap">
+  <section id="quotes">
+    <div class="section-header reveal">
+      <div class="section-num">03</div>
+      <div class="section-label-group">
+        <div class="section-label">الحكم والمأثورات</div>
+        <h2 class="section-title">كلام يُحفر في الذاكرة</h2>
+      </div>
+    </div>
+    <div class="quotes-grid">
+      {% for q in quotes %}
+      <div class="quote-card reveal">
+        <div class="quote-bg-num">"</div>
+        <div class="quote-line"></div>
+        <div class="quote-text">{{ q.text }}</div>
+        <div class="quote-author">{{ q.author }}</div>
+        <div class="quote-context">{{ q.context }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<!-- GALLERY -->
+<div class="section-wrap">
+  <section id="gallery">
+    <div class="section-header reveal">
+      <div class="section-num">04</div>
+      <div class="section-label-group">
+        <div class="section-label">الأرشيف المرئي</div>
+        <h2 class="section-title">وثائق سرية من الميدان</h2>
+      </div>
+    </div>
+    <div class="gallery-grid reveal">
+      {% for item in gallery %}
+      <div class="gallery-item">
+        {{ item.emoji }}
+        <div class="gallery-overlay"></div>
+        <div class="gallery-caption">{{ item.caption }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<!-- SHOUTOUTS -->
+<div class="section-wrap">
+  <section id="shoutouts">
+    <div class="section-header reveal">
+      <div class="section-num">05</div>
+      <div class="section-label-group">
+        <div class="section-label">جدار التعبير</div>
+        <h2 class="section-title">قل ما تريد للشعب</h2>
+      </div>
+    </div>
+    <div class="shoutout-layout">
+      <div class="shoutout-form reveal">
+        <div class="form-title">▸ رسالة جديدة للسجل التاريخي</div>
+        <div class="form-field">
+          <input class="form-input" id="shoutName" placeholder="اسمك" type="text" maxlength="50" autocomplete="off">
+        </div>
+        <div class="form-field">
+          <textarea class="form-input" id="shoutMsg" placeholder="رسالتك للشعب العظيم..." maxlength="300"></textarea>
+        </div>
+        <button class="submit-btn" id="shoutSubmit" type="button">إرسال إلى السجل ←</button>
+      </div>
+      <div class="shoutouts-feed" id="shoutoutsFeed" aria-live="polite" role="log">
+        {% for s in shoutouts %}
+        <div class="shoutout-item">
+          <div class="shoutout-avatar">{{ ['🧠','📊','🤖','🐍','📈','🔬','💡','🎯'] | random }}</div>
+          <div>
+            <div class="shoutout-name">{{ s.name | upper }}</div>
+            <div class="shoutout-text">{{ s.message }}</div>
+            <div class="shoutout-time">{{ s.time }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- POLLS -->
+<div class="section-wrap">
+  <section id="polls">
+    <div class="section-header reveal">
+      <div class="section-num">06</div>
+      <div class="section-label-group">
+        <div class="section-label">التصويت الرسمي</div>
+        <h2 class="section-title">استفتاء الشعب</h2>
+      </div>
+    </div>
+    {% if poll %}
+    <div class="poll-container reveal">
+      <div class="poll-card">
+        <div class="poll-question" id="pollQuestion">{{ poll.question }}</div>
+        <div id="pollOptions" data-poll-id="{{ poll.id }}">
+          {% for opt in poll.options %}
+          <button type="button" class="poll-option" style="--pct:{{ opt.pct }}%" data-option-id="{{ opt.id }}">
+            <span class="poll-text">{{ opt.text }}</span>
+            <span class="poll-pct">{{ opt.pct }}%</span>
+          </button>
+          {% endfor %}
+        </div>
+        <div class="poll-total" id="pollTotal">{{ poll.total }} صوت · اختر بحكمة</div>
+      </div>
+      <div class="poll-info">
+        <div class="poll-info-title">▸ ملاحظة من الديوان</div>
+        <div class="poll-info-text">
+          التصويت في هذا الاستفتاء ملزم ومسجّل في سجلات الشعب. اختر بحكمة، فالتاريخ لا يُمحى.
+          <br><br>
+          النتائج تُحدَّث في الوقت الفعلي. الصوت الواحد لكل عضو.
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="poll-card reveal">
+      <div class="poll-question">لا يوجد تصويت نشط حالياً</div>
+    </div>
+    {% endif %}
+  </section>
+</div>
 
 <!-- FOOTER -->
 <footer>
-  <div>
+  <div class="footer-brand">
     <div class="footer-title">شعب داتا العظيم</div>
     <div class="footer-sub">IUP · Data Science · 2022–2025</div>
   </div>
-  <div class="footer-motto">
-    "كلنا Data Scientists… على الورقة"
-  </div>
+  <div class="footer-motto">"كلنا Data Scientists… على الورقة"</div>
   <div class="footer-meta">
     Nouakchott, Mauritania<br>
     Built with love &amp; deadline pressure
