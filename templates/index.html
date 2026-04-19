@@ -5,11 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>شعب داتا العظيم — IUP Data Science</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;500&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;500&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
 </head>
 <body>
+
+<!-- FLAG STRIPE (top) -->
+<div class="flag-stripe">
+  <span class="s-red"></span>
+  <span class="s-green"></span>
+  <span class="s-red"></span>
+</div>
 
 <!-- TICKER -->
 <div class="ticker" aria-hidden="true">
@@ -21,14 +28,24 @@
 <!-- TOP BAR -->
 <div class="top-bar">
   <span>IUP · المعهد الجامعي المهني</span>
-  <span>EST. 2022 · NOUAKCHOTT, MR</span>
   <span><span class="live-dot"></span>LIVE — Promo 2025</span>
+  <div class="auth-links">
+    {% if current_user.is_authenticated %}
+      <span class="user-tag">👤 {{ current_user.display_name }}</span>
+      <a href="/logout" class="logout">تسجيل خروج</a>
+    {% else %}
+      <a href="/login">دخول</a>
+      <a href="/register">تسجيل</a>
+    {% endif %}
+  </div>
 </div>
 
 <!-- HERO -->
 <div class="hero">
   <div class="hero-grid" aria-hidden="true"></div>
   <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-red-top"></div>
+  <div class="hero-red-bot"></div>
   <div class="hero-content">
     <div class="seal">
       <span class="seal-icon">📊</span>
@@ -69,186 +86,195 @@
 
 <!-- COUNTDOWN -->
 <div class="section-wrap">
-  <section id="countdown">
-    <div class="section-header reveal">
-      <div class="section-num">01</div>
-      <div class="section-label-group">
-        <div class="section-label">العد التنازلي</div>
-        <h2 class="section-title">حتى نهاية العذاب الرسمي</h2>
+<section id="countdown">
+  <div class="section-header reveal">
+    <div class="section-num">01</div>
+    <div class="section-label-group">
+      <div class="section-label">العد التنازلي</div>
+      <h2 class="section-title">حتى نهاية العذاب الرسمي</h2>
+    </div>
+  </div>
+  <div class="countdown-box reveal">
+    <div class="hero-red-top"></div>
+    <div class="hero-red-bot"></div>
+    <p class="countdown-label">الوقت المتبقي حتى التخرج · Juin 2025</p>
+    <div class="countdown-display">
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-days">00</span>
+        <span class="cd-label">يوم</span>
+      </div>
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-hours">00</span>
+        <span class="cd-label">ساعة</span>
+      </div>
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-mins">00</span>
+        <span class="cd-label">دقيقة</span>
+      </div>
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-secs">00</span>
+        <span class="cd-label">ثانية</span>
       </div>
     </div>
-    <div class="countdown-box reveal">
-      <p class="countdown-label">الوقت المتبقي حتى التخرج · Juin 2025</p>
-      <div class="countdown-display">
-        <div class="cd-unit">
-          <span class="cd-num" id="cd-days">00</span>
-          <span class="cd-label">يوم</span>
-        </div>
-        <div class="cd-unit">
-          <span class="cd-num" id="cd-hours">00</span>
-          <span class="cd-label">ساعة</span>
-        </div>
-        <div class="cd-unit">
-          <span class="cd-num" id="cd-mins">00</span>
-          <span class="cd-label">دقيقة</span>
-        </div>
-        <div class="cd-unit">
-          <span class="cd-num" id="cd-secs">00</span>
-          <span class="cd-label">ثانية</span>
-        </div>
-      </div>
-    </div>
-  </section>
+  </div>
+</section>
 </div>
 
 <!-- MEMBERS -->
 <div class="section-wrap">
-  <section id="members">
-    <div class="section-header reveal">
-      <div class="section-num">02</div>
-      <div class="section-label-group">
-        <div class="section-label">الأعضاء المؤسسون</div>
-        <h2 class="section-title">عقول الشعب العظيم</h2>
-      </div>
+<section id="members">
+  <div class="section-header reveal">
+    <div class="section-num">02</div>
+    <div class="section-label-group">
+      <div class="section-label">الأعضاء المؤسسون</div>
+      <h2 class="section-title">عقول الشعب العظيم</h2>
     </div>
-    <div class="members-grid">
-      {% for m in members %}
-      <div class="member-card reveal">
-        {% if m.badge %}<div class="member-badge">{{ m.badge }}</div>{% endif %}
-        <div class="member-index">{{ '%02d' % loop.index }} / {{ '%02d' % members|length }}</div>
-        <span class="member-avatar">{{ m.emoji }}</span>
-        <div class="member-name">{{ m.name }}</div>
-        <div class="member-title">{{ m.title }}</div>
-        <div class="member-divider"></div>
-        <div class="member-quote">"{{ m.quote }}"</div>
-      </div>
-      {% endfor %}
+  </div>
+  <div class="members-grid">
+    {% for m in members %}
+    <div class="member-card reveal">
+      {% if m.badge %}<div class="member-badge">{{ m.badge }}</div>{% endif %}
+      <div class="member-index">{{ '%02d' % loop.index }} / {{ '%02d' % members|length }}</div>
+      <span class="member-avatar">{{ m.emoji }}</span>
+      <div class="member-name">{{ m.name }}</div>
+      <div class="member-title">{{ m.title }}</div>
+      <div class="member-divider"></div>
+      <div class="member-quote">"{{ m.quote }}"</div>
     </div>
-  </section>
+    {% endfor %}
+  </div>
+</section>
 </div>
 
 <!-- QUOTES -->
 <div class="section-wrap">
-  <section id="quotes">
-    <div class="section-header reveal">
-      <div class="section-num">03</div>
-      <div class="section-label-group">
-        <div class="section-label">الحكم والمأثورات</div>
-        <h2 class="section-title">كلام يُحفر في الذاكرة</h2>
-      </div>
+<section id="quotes">
+  <div class="section-header reveal">
+    <div class="section-num">03</div>
+    <div class="section-label-group">
+      <div class="section-label">الحكم والمأثورات</div>
+      <h2 class="section-title">كلام يُحفر في الذاكرة</h2>
     </div>
-    <div class="quotes-grid">
-      {% for q in quotes %}
-      <div class="quote-card reveal">
-        <div class="quote-bg-num">"</div>
-        <div class="quote-line"></div>
-        <div class="quote-text">{{ q.text }}</div>
-        <div class="quote-author">{{ q.author }}</div>
-        <div class="quote-context">{{ q.context }}</div>
-      </div>
-      {% endfor %}
+  </div>
+  <div class="quotes-grid">
+    {% for q in quotes %}
+    <div class="quote-card reveal">
+      <div class="quote-bg-num">"</div>
+      <div class="quote-line"></div>
+      <div class="quote-text">{{ q.text }}</div>
+      <div class="quote-author">{{ q.author }}</div>
+      <div class="quote-context">{{ q.context }}</div>
     </div>
-  </section>
+    {% endfor %}
+  </div>
+</section>
 </div>
 
 <!-- GALLERY -->
 <div class="section-wrap">
-  <section id="gallery">
-    <div class="section-header reveal">
-      <div class="section-num">04</div>
-      <div class="section-label-group">
-        <div class="section-label">الأرشيف المرئي</div>
-        <h2 class="section-title">وثائق سرية من الميدان</h2>
-      </div>
+<section id="gallery">
+  <div class="section-header reveal">
+    <div class="section-num">04</div>
+    <div class="section-label-group">
+      <div class="section-label">الأرشيف المرئي</div>
+      <h2 class="section-title">وثائق سرية من الميدان</h2>
     </div>
-    <div class="gallery-grid reveal">
-      {% for item in gallery %}
-      <div class="gallery-item">
-        {{ item.emoji }}
-        <div class="gallery-overlay"></div>
-        <div class="gallery-caption">{{ item.caption }}</div>
-      </div>
-      {% endfor %}
+  </div>
+  <div class="gallery-grid reveal">
+    {% for item in gallery %}
+    <div class="gallery-item">
+      {{ item.emoji }}
+      <div class="gallery-overlay"></div>
+      <div class="gallery-caption">{{ item.caption }}</div>
     </div>
-  </section>
+    {% endfor %}
+  </div>
+</section>
 </div>
 
 <!-- SHOUTOUTS -->
 <div class="section-wrap">
-  <section id="shoutouts">
-    <div class="section-header reveal">
-      <div class="section-num">05</div>
-      <div class="section-label-group">
-        <div class="section-label">جدار التعبير</div>
-        <h2 class="section-title">قل ما تريد للشعب</h2>
-      </div>
+<section id="shoutouts">
+  <div class="section-header reveal">
+    <div class="section-num">05</div>
+    <div class="section-label-group">
+      <div class="section-label">جدار التعبير</div>
+      <h2 class="section-title">قل ما تريد للشعب</h2>
     </div>
-    <div class="shoutout-layout">
-      <div class="shoutout-form reveal">
-        <div class="form-title">▸ رسالة جديدة للسجل التاريخي</div>
+  </div>
+  <div class="shoutout-layout">
+    <div class="shoutout-form reveal">
+      {% if current_user.is_authenticated %}
+        <div class="form-title">▸ رسالة من {{ current_user.display_name }}</div>
         <div class="form-field">
-          <input class="form-input" id="shoutName" placeholder="اسمك" type="text" maxlength="50" autocomplete="off">
-        </div>
-        <div class="form-field">
-          <textarea class="form-input" id="shoutMsg" placeholder="رسالتك للشعب العظيم..." maxlength="300"></textarea>
+          <textarea class="form-input" id="shoutMsg" placeholder="رسالتك للشعب العظيم..." maxlength="500"></textarea>
         </div>
         <button class="submit-btn" id="shoutSubmit" type="button">إرسال إلى السجل ←</button>
-      </div>
-      <div class="shoutouts-feed" id="shoutoutsFeed" aria-live="polite" role="log">
-        {% for s in shoutouts %}
-        <div class="shoutout-item">
-          <div class="shoutout-avatar">{{ ['🧠','📊','🤖','🐍','📈','🔬','💡','🎯'] | random }}</div>
-          <div>
-            <div class="shoutout-name">{{ s.name | upper }}</div>
-            <div class="shoutout-text">{{ s.message }}</div>
-            <div class="shoutout-time">{{ s.time }}</div>
-          </div>
+      {% else %}
+        <div class="form-title">▸ جدار التعبير</div>
+        <div class="login-prompt">
+          <p>يجب تسجيل الدخول للكتابة في الجدار</p>
+          <a href="/login" class="btn-green">دخول</a>
+          <a href="/register" class="btn-outline">تسجيل جديد</a>
         </div>
-        {% endfor %}
-      </div>
+      {% endif %}
     </div>
-  </section>
+    <div class="shoutouts-feed" id="shoutoutsFeed" aria-live="polite" role="log">
+      {% for s in shoutouts %}
+      <div class="shoutout-item">
+        <div class="shoutout-avatar">{{ ['🧠','📊','🤖','🐍','📈','🔬','💡','🎯'] | random }}</div>
+        <div>
+          <div class="shoutout-name">{{ s.name | upper }}</div>
+          <div class="shoutout-text">{{ s.message }}</div>
+          <div class="shoutout-time">{{ s.time }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
 </div>
 
 <!-- POLLS -->
 <div class="section-wrap">
-  <section id="polls">
-    <div class="section-header reveal">
-      <div class="section-num">06</div>
-      <div class="section-label-group">
-        <div class="section-label">التصويت الرسمي</div>
-        <h2 class="section-title">استفتاء الشعب</h2>
+<section id="polls">
+  <div class="section-header reveal">
+    <div class="section-num">06</div>
+    <div class="section-label-group">
+      <div class="section-label">التصويت الرسمي</div>
+      <h2 class="section-title">استفتاء الشعب</h2>
+    </div>
+  </div>
+  {% if poll %}
+  <div class="poll-container reveal">
+    <div class="poll-card">
+      <div class="poll-question" id="pollQuestion">{{ poll.question }}</div>
+      <div id="pollOptions" data-poll-id="{{ poll.id }}" data-voted="{{ 'true' if user_voted else 'false' }}">
+        {% for opt in poll.options %}
+        <button type="button"
+          class="poll-option {{ 'voted' if user_voted else '' }}"
+          style="--pct:{{ opt.pct }}%"
+          data-option-id="{{ opt.id }}">
+          <span class="poll-text">{{ opt.text }}</span>
+          <span class="poll-pct">{{ opt.pct }}%</span>
+        </button>
+        {% endfor %}
+      </div>
+      <div class="poll-total" id="pollTotal">{{ poll.total }} صوت · اختر بحكمة</div>
+    </div>
+    <div class="poll-info">
+      <div class="poll-info-title">▸ ملاحظة من الديوان</div>
+      <div class="poll-info-text">
+        التصويت في هذا الاستفتاء ملزم ومسجّل في سجلات الشعب العظيم. اختر بحكمة، فالتاريخ لا يُمحى.
+        <br><br>
+        النتائج تُحدَّث فور التصويت. صوت واحد لكل عضو في هذا الجلسة.
       </div>
     </div>
-    {% if poll %}
-    <div class="poll-container reveal">
-      <div class="poll-card">
-        <div class="poll-question" id="pollQuestion">{{ poll.question }}</div>
-        <div id="pollOptions" data-poll-id="{{ poll.id }}">
-          {% for opt in poll.options %}
-          <button type="button" class="poll-option" style="--pct:{{ opt.pct }}%" data-option-id="{{ opt.id }}">
-            <span class="poll-text">{{ opt.text }}</span>
-            <span class="poll-pct">{{ opt.pct }}%</span>
-          </button>
-          {% endfor %}
-        </div>
-        <div class="poll-total" id="pollTotal">{{ poll.total }} صوت · اختر بحكمة</div>
-      </div>
-      <div class="poll-info">
-        <div class="poll-info-title">▸ ملاحظة من الديوان</div>
-        <div class="poll-info-text">
-          التصويت في هذا الاستفتاء ملزم ومسجّل في سجلات الشعب. اختر بحكمة، فالتاريخ لا يُمحى.
-          <br><br>
-          النتائج تُحدَّث في الوقت الفعلي. الصوت الواحد لكل عضو.
-        </div>
-      </div>
-    </div>
-    {% else %}
-    <div class="poll-card reveal">
-      <div class="poll-question">لا يوجد تصويت نشط حالياً</div>
-    </div>
-    {% endif %}
-  </section>
+  </div>
+  {% else %}
+  <p class="reveal" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);">لا يوجد تصويت نشط حالياً.</p>
+  {% endif %}
+</section>
 </div>
 
 <!-- FOOTER -->
@@ -264,6 +290,9 @@
   </div>
 </footer>
 
+<script>
+  const IS_LOGGED_IN = {{ 'true' if current_user.is_authenticated else 'false' }};
+</script>
 <script src="/static/js/main.js"></script>
 </body>
 </html>

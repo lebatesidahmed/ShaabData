@@ -10,19 +10,22 @@ function pad(v) { return String(v).padStart(2,'0'); }
 function updateCountdown() {
   const diff = GRADUATION - Date.now();
   if (diff <= 0) {
-    document.getElementById('cd-days').textContent  = '00';
-    document.getElementById('cd-hours').textContent = '00';
-    document.getElementById('cd-mins').textContent  = '00';
-    document.getElementById('cd-secs').textContent  = '🎉';
+    ['cd-days','cd-hours','cd-mins'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '00';
+    });
+    const s = document.getElementById('cd-secs');
+    if (s) s.textContent = '🎉';
     return;
   }
-  document.getElementById('cd-days').textContent  = pad(Math.floor(diff / 86400000));
-  document.getElementById('cd-hours').textContent = pad(Math.floor((diff % 86400000) / 3600000));
-  document.getElementById('cd-mins').textContent  = pad(Math.floor((diff % 3600000) / 60000));
-  document.getElementById('cd-secs').textContent  = pad(Math.floor((diff % 60000) / 1000));
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = pad(v); };
+  set('cd-days',  Math.floor(diff / 86400000));
+  set('cd-hours', Math.floor((diff % 86400000) / 3600000));
+  set('cd-mins',  Math.floor((diff % 3600000) / 60000));
+  set('cd-secs',  Math.floor((diff % 60000) / 1000));
 }
 
-function showToast(msg) {
+function showToast(msg, isError = false) {
   let t = document.querySelector('.toast');
   if (!t) {
     t = document.createElement('div');
@@ -30,21 +33,24 @@ function showToast(msg) {
     document.body.appendChild(t);
   }
   t.textContent = msg;
+  t.style.background = isError ? 'var(--red)' : 'var(--green)';
   t.classList.add('show');
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
 function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function randomAvatar() { return AVATARS[Math.floor(Math.random() * AVATARS.length)]; }
+
 function renderShoutoutItem(s) {
-  const avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
   const div = document.createElement('div');
   div.className = 'shoutout-item';
   div.innerHTML = `
-    <div class="shoutout-avatar">${avatar}</div>
+    <div class="shoutout-avatar">${randomAvatar()}</div>
     <div>
       <div class="shoutout-name">${escapeHtml(s.name).toUpperCase()}</div>
       <div class="shoutout-text">${escapeHtml(s.message)}</div>
@@ -54,34 +60,36 @@ function renderShoutoutItem(s) {
 }
 
 async function submitShoutout() {
-  const nameEl = document.getElementById('shoutName');
-  const msgEl  = document.getElementById('shoutMsg');
-  const btn    = document.getElementById('shoutSubmit');
-  const name   = nameEl.value.trim();
-  const message = msgEl.value.trim();
-  if (!name || !message) { showToast('أدخل اسمك ورسالتك أولاً'); return; }
+  if (typeof IS_LOGGED_IN !== 'undefined' && !IS_LOGGED_IN) {
+    window.location.href = '/login';
+    return;
+  }
+  const msgEl = document.getElementById('shoutMsg');
+  const btn   = document.getElementById('shoutSubmit');
+  const message = msgEl?.value.trim();
+  if (!message) { showToast('اكتب رسالتك أولاً', true); return; }
 
   btn.disabled = true;
+  const orig = btn.textContent;
   btn.textContent = '...جاري الإرسال';
   try {
     const res = await fetch('/api/shoutouts', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ name, message }),
+      body: JSON.stringify({ message }),
     });
+    if (res.status === 401) { window.location.href = '/login'; return; }
     if (!res.ok) throw new Error();
     const shoutout = await res.json();
-    const feed = document.getElementById('shoutoutsFeed');
-    feed.prepend(renderShoutoutItem(shoutout));
-    nameEl.value = '';
+    document.getElementById('shoutoutsFeed')?.prepend(renderShoutoutItem(shoutout));
     msgEl.value = '';
-    nameEl.focus();
+    msgEl.focus();
     showToast('✓ تم التسجيل في السجل التاريخي');
   } catch {
-    showToast('حدث خطأ، حاول مرة ثانية');
+    showToast('حدث خطأ، حاول مرة ثانية', true);
   } finally {
     btn.disabled = false;
-    btn.textContent = 'إرسال إلى السجل ←';
+    btn.textContent = orig;
   }
 }
 
@@ -114,44 +122,46 @@ async function castVote(optionId) {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ option_id: optionId }),
     });
+    if (res.status === 400) { showToast('صوّتت مسبقاً ✓', false); return; }
     if (!res.ok) throw new Error();
-    const data = await res.json();
-    renderPoll(data);
+    renderPoll(await res.json());
     showToast('✓ تم تسجيل صوتك');
   } catch {
     pollVoted = false;
     pollSelectedId = null;
-    showToast('خطأ في التصويت، حاول مرة ثانية');
+    showToast('خطأ في التصويت، حاول مرة ثانية', true);
   }
 }
 
 function initScrollReveal() {
-  const els = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver(entries => {
+  const obs = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
         e.target.classList.add('visible');
-        observer.unobserve(e.target);
+        obs.unobserve(e.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-  els.forEach((el, i) => {
-    el.style.transitionDelay = (i % 6) * 0.07 + 's';
-    observer.observe(el);
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.transitionDelay = (i % 5) * 0.07 + 's';
+    obs.observe(el);
   });
 }
 
 function initNavHighlight() {
   const sections = document.querySelectorAll('section[id]');
-  const links = document.querySelectorAll('nav a[href^="#"]');
-  const obs = new IntersectionObserver(entries => {
+  const links    = document.querySelectorAll('nav a[href^="#"]');
+  new IntersectionObserver(entries => {
     entries.forEach(e => {
-      if (e.isIntersecting) {
+      if (e.isIntersecting)
         links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
-      }
     });
-  }, { threshold: 0.35 });
-  sections.forEach(s => obs.observe(s));
+  }, { threshold: 0.35 }).observe && sections.forEach(s =>
+    new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting)
+        links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + s.id));
+    }, { threshold: 0.35 }).observe(s)
+  );
 }
 
 function init() {
@@ -163,10 +173,11 @@ function init() {
     if (e.key === 'Enter' && e.ctrlKey) submitShoutout();
   });
 
-  const pollOptionsEl = document.getElementById('pollOptions');
-  if (pollOptionsEl?.dataset.pollId) {
-    pollId = parseInt(pollOptionsEl.dataset.pollId);
-    pollOptionsEl.addEventListener('click', e => {
+  const pollEl = document.getElementById('pollOptions');
+  if (pollEl) {
+    pollId = parseInt(pollEl.dataset.pollId);
+    pollVoted = pollEl.dataset.voted === 'true';
+    pollEl.addEventListener('click', e => {
       const btn = e.target.closest('[data-option-id]');
       if (btn) castVote(parseInt(btn.dataset.optionId));
     });

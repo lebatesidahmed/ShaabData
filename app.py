@@ -1,38 +1,63 @@
-from flask import Flask, render_template, request, jsonify, abort
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, abort, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shaab_data.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'shaab-data-el-azeem-secret')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'shaab-data-el-azeem-2025')
 
 db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'يجب تسجيل الدخول أولاً'
+login_manager.login_message_category = 'warning'
+
+# ─── MODELS ───────────────────────────────────────────────
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    display_name = db.Column(db.String(80), nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    shoutouts = db.relationship('Shoutout', backref='author', lazy=True)
+
+    def set_password(self, pw):
+        self.password_hash = generate_password_hash(pw)
+
+    def check_password(self, pw):
+        return check_password_hash(self.password_hash, pw)
+
+@login_manager.user_loader
+def load_user(uid):
+    return db.session.get(User, int(uid))
 
 class Shoutout(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    message = db.Column(db.String(300), nullable=False)
+    message = db.Column(db.String(500), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    guest_name = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def display_name(self):
+        return self.author.display_name if self.author else (self.guest_name or 'مجهول')
 
     def to_dict(self):
         diff = datetime.utcnow() - self.created_at
         secs = int(diff.total_seconds())
         if secs < 60:
-            time_str = 'الآن'
+            t = 'الآن'
         elif secs < 3600:
-            time_str = f'منذ {secs // 60} دقيقة'
+            t = f'منذ {secs // 60} دقيقة'
         elif secs < 86400:
-            time_str = f'منذ {secs // 3600} ساعة'
+            t = f'منذ {secs // 3600} ساعة'
         else:
-            time_str = f'منذ {secs // 86400} يوم'
-        return {
-            'id': self.id,
-            'name': self.name,
-            'message': self.message,
-            'time': time_str,
-        }
+            t = f'منذ {secs // 86400} يوم'
+        return {'id': self.id, 'name': self.display_name(), 'message': self.message, 'time': t}
 
 class Poll(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -55,6 +80,8 @@ class PollOption(db.Model):
 
     def to_dict(self):
         return {'id': self.id, 'text': self.text, 'votes': self.votes}
+
+# ─── STATIC DATA ──────────────────────────────────────────
 
 MEMBERS = [
     {"name": "لبات", "title": "Chief Data Officer", "quote": "نموذجي في الإنتاج، والتقرير جاهز بكرة", "emoji": "🧠", "badge": "الرئيس التنفيذي"},
@@ -91,68 +118,121 @@ def seed_db():
         p = Poll(question="من سيجد عمل أول في الشعب العظيم؟")
         db.session.add(p)
         db.session.flush()
-        opts = [
+        db.session.add_all([
             PollOption(poll_id=p.id, text="اللي ما توقعناه", votes=14),
             PollOption(poll_id=p.id, text="اللي دايم يقول عنده connections", votes=8),
             PollOption(poll_id=p.id, text="صاحب الـ LinkedIn المحدّث", votes=19),
             PollOption(poll_id=p.id, text="اللي ما يزال يذاكر", votes=5),
-        ]
-        db.session.add_all(opts)
-
+        ])
     if Shoutout.query.count() == 0:
-        seeds = [
-            Shoutout(name="لبات", message="يا شعب داتا العظيم، التاريخ سيذكرنا 🏆"),
-            Shoutout(name="عضو 2", message="كل الـ models في العالم ما تساوى صداقتنا 💛"),
-            Shoutout(name="عضو 3", message="بعد التخرج، نطلع نفس خطة العمل 😂"),
-        ]
-        db.session.add_all(seeds)
-
+        db.session.add_all([
+            Shoutout(guest_name="لبات", message="يا شعب داتا العظيم، التاريخ سيذكرنا 🏆"),
+            Shoutout(guest_name="عضو 2", message="كل الـ models في العالم ما تساوى صداقتنا 💛"),
+            Shoutout(guest_name="عضو 3", message="بعد التخرج، نطلع نفس خطة العمل 😂"),
+        ])
     db.session.commit()
+
+# ─── AUTH ROUTES ──────────────────────────────────────────
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip().lower()
+        password = request.form.get('password', '')
+        user = User.query.filter_by(username=username).first()
+        if user and user.check_password(password):
+            login_user(user, remember=True)
+            return redirect(url_for('index'))
+        error = 'اسم المستخدم أو كلمة المرور غير صحيحة'
+    return render_template('login.html', error=error)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip().lower()
+        display_name = request.form.get('display_name', '').strip()
+        password = request.form.get('password', '')
+        confirm = request.form.get('confirm', '')
+        if not username or not display_name or not password:
+            error = 'يرجى ملء جميع الحقول'
+        elif len(password) < 6:
+            error = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'
+        elif password != confirm:
+            error = 'كلمتا المرور غير متطابقتين'
+        elif User.query.filter_by(username=username).first():
+            error = 'اسم المستخدم مأخوذ، اختر آخر'
+        else:
+            user = User(username=username, display_name=display_name)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            login_user(user, remember=True)
+            return redirect(url_for('index'))
+    return render_template('register.html', error=error)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+# ─── MAIN ROUTES ──────────────────────────────────────────
 
 @app.route('/')
 def index():
     poll = Poll.query.filter_by(active=True).order_by(Poll.id.desc()).first()
-    shoutouts = Shoutout.query.order_by(Shoutout.created_at.desc()).limit(20).all()
+    shoutouts = Shoutout.query.order_by(Shoutout.created_at.desc()).limit(30).all()
+    voted_polls = session.get('voted_polls', [])
+    user_voted = poll and poll.id in voted_polls if poll else False
     return render_template(
         'index.html',
         members=MEMBERS,
         quotes=QUOTES,
         gallery=GALLERY,
         poll=poll.to_dict() if poll else None,
+        user_voted=user_voted,
         shoutouts=[s.to_dict() for s in shoutouts],
         member_count=len(MEMBERS),
     )
 
+# ─── API ROUTES ───────────────────────────────────────────
+
 @app.route('/api/shoutouts', methods=['GET'])
 def get_shoutouts():
-    shoutouts = Shoutout.query.order_by(Shoutout.created_at.desc()).limit(20).all()
-    return jsonify([s.to_dict() for s in shoutouts])
+    items = Shoutout.query.order_by(Shoutout.created_at.desc()).limit(30).all()
+    return jsonify([s.to_dict() for s in items])
 
 @app.route('/api/shoutouts', methods=['POST'])
 def post_shoutout():
+    if not current_user.is_authenticated:
+        return jsonify({'error': 'يجب تسجيل الدخول'}), 401
     data = request.get_json(force=True)
-    name = (data.get('name') or '').strip()[:50]
-    message = (data.get('message') or '').strip()[:300]
-    if not name or not message:
+    message = (data.get('message') or '').strip()[:500]
+    if not message:
         abort(400)
-    s = Shoutout(name=name, message=message)
+    s = Shoutout(message=message, user_id=current_user.id)
     db.session.add(s)
     db.session.commit()
     return jsonify(s.to_dict()), 201
 
 @app.route('/api/polls/<int:poll_id>/vote', methods=['POST'])
 def vote(poll_id):
-    poll = Poll.query.get_or_404(poll_id)
+    poll = db.session.get(Poll, poll_id) or abort(404)
+    voted_polls = session.get('voted_polls', [])
+    if poll_id in voted_polls:
+        return jsonify({'error': 'already voted'}), 400
     data = request.get_json(force=True)
-    option_id = data.get('option_id')
-    option = PollOption.query.filter_by(id=option_id, poll_id=poll_id).first_or_404()
+    option = PollOption.query.filter_by(id=data.get('option_id'), poll_id=poll_id).first_or_404()
     option.votes += 1
     db.session.commit()
-    return jsonify(poll.to_dict())
-
-@app.route('/api/polls/<int:poll_id>', methods=['GET'])
-def get_poll(poll_id):
-    poll = Poll.query.get_or_404(poll_id)
+    voted_polls.append(poll_id)
+    session['voted_polls'] = voted_polls
     return jsonify(poll.to_dict())
 
 if __name__ == '__main__':
