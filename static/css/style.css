@@ -1000,3 +1000,151 @@ footer {
   .stat { padding: 16px 22px; }
   .auth-card { padding: 32px 24px; }
 }
+
+/* ─── UPLOAD ZONE ─── */
+.upload-zone {
+  border: 2px dashed var(--border-dark);
+  background: var(--off-white);
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 28px;
+  transition: border-color 0.25s, background 0.25s;
+  cursor: pointer;
+}
+.upload-zone.drag-over {
+  border-color: var(--green);
+  background: var(--green-dim);
+}
+.upload-icon { font-size: 40px; margin-bottom: 10px; }
+.upload-text {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 15px;
+  color: var(--text-2);
+  margin-bottom: 14px;
+}
+.upload-btn {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  padding: 10px 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.upload-btn:hover { background: var(--green-light); }
+.upload-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 12px;
+  letter-spacing: 0.1em;
+}
+.upload-progress {
+  margin-top: 16px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.upload-bar {
+  height: 100%;
+  background: var(--green);
+  width: 0%;
+  transition: width 0.3s;
+}
+
+/* ─── REAL GALLERY ─── */
+.real-gallery-grid {
+  columns: 4;
+  column-gap: 6px;
+}
+@media (max-width: 900px) { .real-gallery-grid { columns: 2; } }
+@media (max-width: 500px) { .real-gallery-grid { columns: 1; } }
+
+.real-gallery-item {
+  break-inside: avoid;
+  margin-bottom: 6px;
+  position: relative;
+  overflow: hidden;
+  background: var(--off-white);
+  cursor: pointer;
+}
+.real-gallery-item img,
+.real-gallery-item video {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.35s;
+}
+.real-gallery-item:hover img,
+.real-gallery-item:hover video { transform: scale(1.04); }
+
+.real-gallery-item .gallery-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,98,51,0.8) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.real-gallery-item:hover .gallery-overlay { opacity: 1; }
+
+.real-gallery-item .gallery-info {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 12px 14px 10px;
+  transform: translateY(100%);
+  transition: transform 0.3s;
+  z-index: 2;
+}
+.real-gallery-item:hover .gallery-info { transform: translateY(0); }
+
+.real-gallery-item .gallery-caption {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 500;
+  position: static;
+  transform: none;
+  padding: 0;
+  text-align: right;
+}
+.real-gallery-item .gallery-uploader {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.1em;
+  margin-top: 3px;
+  text-align: right;
+}
+.gallery-delete {
+  position: absolute;
+  top: 8px; left: 8px;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  width: 26px; height: 26px;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 3;
+  display: flex; align-items: center; justify-content: center;
+}
+.real-gallery-item:hover .gallery-delete { opacity: 1; }
+
+.gallery-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 16px;
+  border: 2px dashed var(--border);
+}
+
+/* ─── CAPTION MODAL ─── */
+#captionModal.open {
+  display: flex !important;
+}
