@@ -1,4 +1,4 @@
-const GRADUATION = new Date(Date.UTC(2025, 5, 30, 0, 0, 0));
+const GRADUATION = new Date(Date.UTC(2026, 7, 8, 0, 0, 0));
 const AVATARS = ['🧠','📊','🤖','🐍','📈','🔬','💡','🎯','🦾','📐','🧬','🌐'];
 const POLL_INTERVAL = 5000; // ms between live-update checks
 
@@ -267,10 +267,26 @@ async function pollGallery() {
   } catch { /* silent */ }
 }
 
+async function pollPolls() {
+  if (!pollId) return;
+  try {
+    const res = await fetch(`/api/polls/${pollId}`);
+    if (!res.ok) return;
+    const pollData = await res.json();
+    // Only update if there are changes (avoid unnecessary re-renders)
+    const currentTotal = document.getElementById('pollTotal')?.textContent;
+    const newTotal = `${pollData.total} صوت · اختر بحكمة`;
+    if (currentTotal !== newTotal) {
+      renderPoll(pollData);
+    }
+  } catch { /* silent */ }
+}
+
 function startLiveUpdates() {
   scanInitialIds();
   setInterval(pollShoutouts, POLL_INTERVAL);
   setInterval(pollGallery,   POLL_INTERVAL);
+  setInterval(pollPolls,     POLL_INTERVAL);
 }
 
 // ─── SCROLL / NAV ─────────────────────────────────────────

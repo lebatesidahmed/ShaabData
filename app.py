@@ -15,7 +15,8 @@ ALLOWED_ALL   = ALLOWED_IMAGE | ALLOWED_VIDEO
 MAX_MB        = 64
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///shaab_data.db')
+db_url = os.environ.get('DATABASE_URL', 'sqlite:///shaab_data.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url.replace('postgres://', 'postgresql://', 1)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'shaab-data-el-azeem-2026')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
