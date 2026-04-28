@@ -15,9 +15,9 @@ ALLOWED_ALL   = ALLOWED_IMAGE | ALLOWED_VIDEO
 MAX_MB        = 64
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shaab_data.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///shaab_data.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'shaab-data-el-azeem-2025')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'shaab-data-el-azeem-2026')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_MB * 1024 * 1024
 
@@ -133,30 +133,28 @@ class PollOption(db.Model):
 # ─── STATIC FALLBACK DATA ─────────────────────────────────
 
 QUOTES = [
-    {"text": "الاستاذ: هل فهمتم؟ الشعب: نعم. بعد الامتحان: 🤡", "author": "— الشعب جماعة", "context": "كل ليلة قبل الامتحان"},
-    {"text": "المشروع الأول في الحياة العملية سيبدأ من الصفر بغض النظر عما درسنا", "author": "— حكمة شعبية", "context": "اكتُشفت في التربص"},
-    {"text": "Correlation is not causation — لكن في الامتحان: كل شيء سببي", "author": "— إجماع الشعب", "context": "إحصاء، الفصل الثالث"},
-    {"text": "نموذجي وصل 95% دقة. على بيانات التدريب فقط.", "author": "— كل واحد فينا", "context": "مشروع PFE"},
-    {"text": "الداتا ما كدبتش، لكن العينة ضغيفة شوية", "author": "— الأستاذ في كل مرة", "context": "عرض الفصل"},
-    {"text": "سأعمل في Google بعد التخرج بستة أشهر", "author": "— نحن في 2022", "context": "اليوم الأول في IUP"},
+    {"text": "الاستاذ: الظحك بعيلو الشعب: 😂😂😂😂   ", "author": "— أستاذ الجبر", "context": "S1"},
+    {"text": "خرصيلك عاگب لفطور، الين تفطري ان شاءلله دور تفهميه🤣", "author": "— محمد احمد", "context": "S2"},
+    {"text": "يغير بروف هو ذلي گال لوجيك", "author": "— باب سابگ ينصاع🤣", "context": "S2"},
+    {"text": "وسعو المرجع🤣", "author": "— بروف Machine Learning", "context": " S3"},
+    {"text": "انتوم منهومَ 😂😂😂😂😂😂", "author": "— عزيزة", "context": "S1"},
+    {"text": "AnH AnH", "author": "— prof Intro", "context": "S1"},
 ]
 
 def seed_db():
     if Poll.query.count() == 0:
-        p = Poll(question="من سيجد عمل أول في الشعب العظيم؟")
+        p = Poll(question="من هو اشعر حد في الدفعة؟")
         db.session.add(p)
         db.session.flush()
         db.session.add_all([
-            PollOption(poll_id=p.id, text="اللي ما توقعناه",              votes=14),
-            PollOption(poll_id=p.id, text="اللي دايم يقول عنده connections", votes=8),
-            PollOption(poll_id=p.id, text="صاحب الـ LinkedIn المحدّث",    votes=19),
-            PollOption(poll_id=p.id, text="اللي ما يزال يذاكر",           votes=5),
+            PollOption(poll_id=p.id, text="مريم  ",              votes=0),
+            PollOption(poll_id=p.id, text="مريم منت الشيخ    ", votes=0),
+            PollOption(poll_id=p.id, text="مريم منت سيداتي   ",    votes=0),
+            PollOption(poll_id=p.id, text="مريم داتا   ",           votes=0),
         ])
     if Shoutout.query.count() == 0:
         db.session.add_all([
-            Shoutout(guest_name="لبات",  message="يا شعب داتا العظيم، التاريخ سيذكرنا 🏆"),
-            Shoutout(guest_name="عضو 2", message="كل الـ models في العالم ما تساوى صداقتنا 💛"),
-            Shoutout(guest_name="عضو 3", message="بعد التخرج، نطلع نفس خطة العمل 😂"),
+            Shoutout(guest_name="لبات",  message="يا شعب داتا العظيم، التاريخ سيذكرنا "),
         ])
     db.session.commit()
 
